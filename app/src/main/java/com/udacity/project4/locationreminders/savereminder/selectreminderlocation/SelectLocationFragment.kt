@@ -129,9 +129,6 @@ private fun setupObserver() {
         // add a new marker to the map
         addMarkerOnMap("Marker in Sydney", LatLng(-34.0, 151.0), moveCamera = true)
 
-        //add a new market when user long click on a location on the map
-        setMapLongClick()
-
         //add a map overview
         addOverView(R.drawable.map, LatLng(-34.0, 151.0))
 
@@ -163,26 +160,7 @@ private fun setupObserver() {
         }
     }
 
-    private fun setMapLongClick() {
-        mMap.setOnMapLongClickListener { latLng ->
 
-            // A Snippet is Additional text that's displayed below the title.
-            val snippet = String.format(
-                Locale.getDefault(),
-                "Lat: %1$.5f, Long: %2$.5f",
-                latLng.latitude,
-                latLng.longitude
-            )
-
-            mMap.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .title(getString(R.string.dropped_pin))
-                    .snippet(snippet)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-            )
-        }
-    }
     private fun addOverView(drawableRes: Int, homeLatLng: LatLng) {
         val overlaySize = 100f
         val androidOverlay = GroundOverlayOptions()
@@ -219,7 +197,7 @@ private fun setupObserver() {
                 mMap.isMyLocationEnabled = true
                 zoomToUserLocation()
                 setMapClickListener()
-                setPoiClick()
+                setPointClick()
             } else {
                 promptUserToEnableLocationServices()
             }
@@ -265,7 +243,7 @@ private fun setupObserver() {
         }
     }
 
-    private fun setPoiClick() {
+    private fun setPointClick() {
         mMap.setOnPoiClickListener { point ->
             if (_selectLocationViewModel.selectLocation.value == null) {
                 val poiMarker = mMap.addMarker(
@@ -290,6 +268,7 @@ private fun setupObserver() {
         const val REQUEST_LOCATION_PERMISSION = 1
         const val REQUEST_ACTIVITY_RECOGNITION_PERMISSION = 2
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
