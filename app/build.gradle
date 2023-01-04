@@ -81,6 +81,8 @@ dependencies {
     //Room dependencies
     implementation "androidx.room:room-ktx:$roomVersion"
     implementation "androidx.room:room-runtime:$roomVersion"
+    testImplementation project(path: ':app')
+    androidTestImplementation project(path: ':app')
     kapt "androidx.room:room-compiler:$roomVersion"
 
     //Coroutines Dependencies

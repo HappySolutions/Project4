@@ -1,16 +1,31 @@
 package com.udacity.project4
 
 import android.app.Application
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.udacity.project4.authentication.AuthenticationViewModel
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.locationreminders.savereminder.selectreminderlocation.SelectLocationViewModel
+import com.udacity.project4.util.DataBindingIdlingResource
+import com.udacity.project4.util.monitorActivity
+import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -43,6 +58,16 @@ class RemindersActivityTest :
                     get() as ReminderDataSource
                 )
             }
+            viewModel {
+                AuthenticationViewModel(
+                    appContext
+                )
+            }
+            viewModel {
+                SelectLocationViewModel(
+                    appContext
+                )
+            }
             single {
                 SaveReminderViewModel(
                     appContext,
@@ -50,6 +75,7 @@ class RemindersActivityTest :
                 )
             }
             single { RemindersLocalRepository(get()) as ReminderDataSource }
+            single { RemindersLocalRepository(get()) }
             single { LocalDB.createRemindersDao(appContext) }
         }
         //declare a new koin module
@@ -66,6 +92,35 @@ class RemindersActivityTest :
     }
 
 
-//    TODO: add End to End testing to the app
+// add End to End testing to the app
+private val dataBindingIdlingResource = DataBindingIdlingResource()
+
+    @Before
+    fun registerIdlingResource() {
+        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
+    }
+
+    @After
+    fun unregisterIdlingResource() {
+        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
+    }
+
+    @Test
+    fun testAddAReminder_noLocationSelected_snackbarWithErrorMessageAppears(): Unit = runBlocking {
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.reminderTitle)).perform(replaceText("title2"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("description2"))
+        onView(withId(R.id.saveReminder)).perform(click())
+
+        val snackbarMessage = appContext.getString(R.string.select_location)
+        onView(withText(snackbarMessage))
+            .check(matches(isDisplayed()))
+        activityScenario.close()
+    }
 
 }

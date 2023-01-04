@@ -45,4 +45,7 @@
     <string name="geofence_added">Geofence added</string>
     <string name="location_enabled">Location enabled</string>
     <string name="logo_content_description">Logo image</string>
+    <string name="reminder_description" type="id">Description</string>
+    <string name="reminder_latitude" type="id">"Latitude: "</string>
+    <string name="reminder_longitude" type="id">"Longitude: "</string>
 </resources>
