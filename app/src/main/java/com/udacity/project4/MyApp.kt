@@ -1,6 +1,7 @@
 package com.udacity.project4
 
 import android.app.Application
+import com.udacity.project4.authentication.AuthenticationViewModel
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -35,6 +36,9 @@ class MyApp : Application() {
                     get(),
                     get() as ReminderDataSource
                 )
+            }
+            single {
+                AuthenticationViewModel(get())
             }
             single {
                 SelectLocationViewModel(get())

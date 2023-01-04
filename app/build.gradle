@@ -60,7 +60,8 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:31.1.1')
 //    implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-analytics:17.5.0'
-
+    // Firebase Authentication
+    implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
 //    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.8'
     // Architecture Components
     //Navigation dependencies
@@ -129,6 +130,7 @@ dependencies {
     //Maps & Geofencing
     implementation "com.google.android.gms:play-services-location:$playServicesVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesVersion"
-
+    // Multidex
+    implementation 'com.android.support:multidex:1.0.3'
 
 }
