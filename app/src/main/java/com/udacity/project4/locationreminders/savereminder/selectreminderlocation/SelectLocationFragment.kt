@@ -67,17 +67,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback  {
 
         setupObserver()
 
-////        TODO: call this function after the user confirms on the selected location
-//        onLocationSelected()
-
         return binding.root
     }
 
-//    private fun onLocationSelected() {
-//        //        TODO: When the user confirms on the selected location,
-//        //         send back the selected location details to the view model
-//        //         and navigate back to the previous fragment to save the reminder and add the geofence
-//    }
 private fun setupObserver() {
     _selectLocationViewModel.saveLocationClicked.observe(
         viewLifecycleOwner
@@ -177,7 +169,7 @@ private fun setupObserver() {
             // in a raw resource file.
             val success = mMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                    context,
+                    this as Context,
                     R.raw.map_style
                 )
             )
