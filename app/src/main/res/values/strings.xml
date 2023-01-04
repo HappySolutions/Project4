@@ -42,4 +42,6 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="unknown_location">Unknown location</string>
     <string name="only_one_location_allowed">Only one location allowed</string>
+    <string name="geofence_added">Geofence added</string>
+    <string name="location_enabled">Location enabled</string>
 </resources>
