@@ -1,10 +1,18 @@
 package com.udacity.project4.authentication
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.observe
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.IdpResponse
 import com.udacity.project4.R
+import com.udacity.project4.base.IntentCommand
 import com.udacity.project4.databinding.ActivityAuthenticationBinding
+import com.udacity.project4.locationreminders.RemindersActivity
 import org.koin.android.ext.android.inject
 
 /**
@@ -30,16 +38,70 @@ class AuthenticationActivity : AppCompatActivity() {
         binding.viewModel = _viewModel
 
         setupObservers()
-//         TODO: Implement the create account and sign in using FirebaseUI, use sign in using email and sign in using Google
-
-//          TODO: If the user was authenticated, send him to RemindersActivity
-
-//          TODO: a bonus is to customize the sign in flow to look nice using :
-        //https://github.com/firebase/FirebaseUI-Android/blob/master/auth/README.md#custom-layout
-
     }
 
     private fun setupObservers() {
-        TODO("Not yet implemented")
+        _viewModel.signInFlow.observe(this) { launchSignInFlow ->
+            if (launchSignInFlow) {
+                launchSignInFlow()
+                _viewModel.loginFlowDone()
+            }
+        }
+
+        _viewModel.authenticationState.observe(this) { authenticationState ->
+            if (authenticationState == AuthenticationViewModel.AuthenticationState.AUTHENTICATED &&
+                _viewModel.navigateBackToAuth.value == false
+            ) {
+                navigateToRemindersActivity()
+            }
+        }
+
+        _viewModel.navigateBackToAuth.observe(this) { navigateToAuth ->
+            if (navigateToAuth) {
+                _viewModel.navigateBackToAuthDone()
+            }
+        }
+
+        _viewModel.intentCommand.observe(this) { command ->
+            if (command is IntentCommand.ToReminderActivity) {
+                val intent = Intent(command.from, command.to)
+                startActivity(intent)
+            }
+        }
+    }
+    private fun launchSignInFlow() {
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build())
+
+        startActivityForResult(
+            AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setTheme(R.style.FirebaseTheme)
+                .setLogo(R.drawable.map)
+                .setAvailableProviders(providers)
+                .build(),
+            SIGN_IN_RESULT_CODE
+        )
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == SIGN_IN_RESULT_CODE) {
+            val response = IdpResponse.fromResultIntent(data)
+
+            if (resultCode == Activity.RESULT_OK) {
+                navigateToRemindersActivity()
+            } else {
+                Log.i("TAG", response?.error?.errorCode.toString())
+            }
+        }
+    }
+
+    private fun navigateToRemindersActivity() {
+        _viewModel.intentCommand.postValue(
+            IntentCommand.ToReminderActivity(this, RemindersActivity::class.java)
+        )
     }
 }
