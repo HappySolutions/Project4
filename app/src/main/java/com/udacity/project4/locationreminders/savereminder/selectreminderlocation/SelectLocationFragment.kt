@@ -113,69 +113,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback  {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
-
-        // add a new marker to the map
-        //addMarkerOnMap("Marker in Sydney", LatLng(-34.0, 151.0), moveCamera = true)
-
-        //add a map overview
-        //addOverView(R.drawable.map, LatLng(-34.0, 151.0))
-
-        //Change the map style
-        //setMapStyle()
-
-        //enable the user current location
         enableMyLocation()
 
-    }
-
-    private fun addMarkerOnMap(
-        title: String,
-        latLng: LatLng,
-        moveCamera: Boolean = true,
-        zoomLevel: Float = 12.0f
-    ) {
-
-        // Add a marker and move the camera
-        val options = MarkerOptions()
-        options.position(latLng)
-        options.title(title)
-
-        mMap.addMarker(options)
-
-        if (moveCamera) {
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
-            mMap.moveCamera(cameraUpdate)
-        }
-    }
-
-
-    private fun addOverView(drawableRes: Int, homeLatLng: LatLng) {
-        val overlaySize = 100f
-        val androidOverlay = GroundOverlayOptions()
-            .image(BitmapDescriptorFactory.fromResource(drawableRes))
-            .position(homeLatLng, overlaySize)
-
-        mMap.addGroundOverlay(androidOverlay)
-    }
-
-    private fun setMapStyle() {
-        try {
-
-            // Customize the styling of the base map using a JSON object defined
-            // in a raw resource file.
-            val success = mMap.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    context,
-                    R.raw.map_style
-                )
-            )
-
-            if (!success) {
-                Log.e("TAG", "Style parsing failed.")
-            }
-        } catch (e: Resources.NotFoundException) {
-            Log.e("TAG", "Can't find style. Error: ", e)
-        }
     }
 
     @SuppressLint("MissingPermission")
