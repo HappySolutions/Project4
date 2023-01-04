@@ -169,7 +169,7 @@ private fun setupObserver() {
             // in a raw resource file.
             val success = mMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                    this as Context,
+                    context,
                     R.raw.map_style
                 )
             )
