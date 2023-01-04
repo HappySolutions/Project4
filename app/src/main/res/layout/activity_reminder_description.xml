@@ -10,24 +10,70 @@
             type="com.udacity.project4.locationreminders.reminderslist.ReminderDataItem" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
         tools:context=".locationreminders.ReminderDescriptionActivity">
-        <!--TODO: add the design of the reminder details-->
+        <!--add the design of the reminder details-->
 
-        <TextView
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/rem_logo"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Reminder Details"
-            android:textSize="@dimen/text_size_large"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/logo_content_description"
+            android:src="@mipmap/ic_launcher"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/rem_title"
+            style="@style/RemTitleStyle"
+            android:text="@={reminderDataItem.title}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rem_logo"
+            tools:text="Pharmacy reminder" />
+
+        <TextView
+            style="@style/RemSubtitleStyle"
+            android:id="@+id/rem_description"
+            android:paddingBottom="@dimen/padding_large"
+            android:text="@{reminderDataItem.description}"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rem_title"
+            tools:text="Description: Pick up meds from the pharmacy" />
+
+        <TextView
+            android:id="@+id/rem_location"
+            style="@style/RemSubtitleStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingBottom="@dimen/padding_large"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rem_description"
+            android:text="@{reminderDataItem.location}"
+            tools:text="Location: Pharmacy Egypt" />
+
+        <TextView
+            android:id="@+id/rem_latitude"
+            style="@style/RemSubtitleStyle"
+            android:text="@{`` + reminderDataItem.latitude}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rem_location"
+            tools:text="Latitude: 50.1257" />
+
+        <TextView
+            android:id="@+id/rem_longitude"
+            style="@style/RemSubtitleStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rem_latitude"
+            android:text="@{`` + reminderDataItem.longitude}"
+            tools:text="Longitude: 70.52414" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

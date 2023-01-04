@@ -3,30 +3,20 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.content.IntentSender
-import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.observe
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -40,15 +30,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback  {
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
-    val _selectLocationViewModel: SelectLocationViewModel by inject()
+    private val _selectLocationViewModel: SelectLocationViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
-    lateinit var mMap: GoogleMap
+    private lateinit var mMap: GoogleMap
     private lateinit var fragmentContext: Context
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
 
@@ -62,7 +52,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback  {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(fragmentContext)
 
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = childFragmentManager.findFragmentById(R.id.myMap) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         setupObserver()
@@ -70,7 +60,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback  {
         return binding.root
     }
 
-private fun setupObserver() {
+    private fun setupObserver() {
     _selectLocationViewModel.saveLocationClicked.observe(
         viewLifecycleOwner
     ) { isLocationSaved ->
@@ -80,6 +70,7 @@ private fun setupObserver() {
         }
     }
 }
+
     private fun onLocationSelected() {
         _viewModel.navigationCommand.postValue(NavigationCommand.Back)
         val reminderDTO = _selectLocationViewModel.selectLocation.value
@@ -99,17 +90,21 @@ private fun setupObserver() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        // TODO: Change the map type based on the user's selection.
+        //Change the map type based on the user's selection.
         R.id.normal_map -> {
+            mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
             true
         }
         R.id.hybrid_map -> {
+            mMap.mapType = GoogleMap.MAP_TYPE_HYBRID
             true
         }
         R.id.satellite_map -> {
+            mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
             true
         }
         R.id.terrain_map -> {
+            mMap.mapType = GoogleMap.MAP_TYPE_TERRAIN
             true
         }
         else -> super.onOptionsItemSelected(item)
@@ -117,15 +112,16 @@ private fun setupObserver() {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
 
         // add a new marker to the map
-        addMarkerOnMap("Marker in Sydney", LatLng(-34.0, 151.0), moveCamera = true)
+        //addMarkerOnMap("Marker in Sydney", LatLng(-34.0, 151.0), moveCamera = true)
 
         //add a map overview
-        addOverView(R.drawable.map, LatLng(-34.0, 151.0))
+        //addOverView(R.drawable.map, LatLng(-34.0, 151.0))
 
         //Change the map style
-        setMapStyle()
+        //setMapStyle()
 
         //enable the user current location
         enableMyLocation()
@@ -254,11 +250,6 @@ private fun setupObserver() {
                 _viewModel.showErrorMessage.postValue(fragmentContext.getString(R.string.only_one_location_allowed))
             }
         }
-    }
-
-    companion object {
-        const val REQUEST_LOCATION_PERMISSION = 1
-        const val REQUEST_ACTIVITY_RECOGNITION_PERMISSION = 2
     }
 
     override fun onRequestPermissionsResult(
