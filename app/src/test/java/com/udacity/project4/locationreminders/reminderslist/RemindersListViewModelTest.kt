@@ -43,14 +43,11 @@ class RemindersListViewModelTest {
     @Test
     @Config(sdk = intArrayOf(Build.VERSION_CODES.O_MR1))
     fun loadReminders_loading() {
-        //load the reminders
         mainCoroutineRule.pause()
         remindersListViewModel.loadReminders()
 
-        //see the Loader when working thread paused
         assert(remindersListViewModel.showLoading.getOrAwaitValue())
 
-        //see the Loader after dispatcher resumed
         mainCoroutineRule.resume()
         assert(!remindersListViewModel.showLoading.getOrAwaitValue())
     }
@@ -58,15 +55,12 @@ class RemindersListViewModelTest {
     @Test
     @Config(sdk = intArrayOf(Build.VERSION_CODES.O_MR1))
     fun loadReminders_loadingError() {
-        //load the reminders
         mainCoroutineRule.pause()
         remindersRepository.setReturnError(true)
         remindersListViewModel.loadReminders()
 
-        //see the Loader when working thread paused
         assert(remindersListViewModel.showLoading.getOrAwaitValue())
 
-        //see the Loader after dispatcher resumed
         mainCoroutineRule.resume()
         assert(!remindersListViewModel.showLoading.getOrAwaitValue())
     }
@@ -74,15 +68,12 @@ class RemindersListViewModelTest {
     @Test
     @Config(sdk = intArrayOf(Build.VERSION_CODES.O_MR1))
     fun loadReminders_noData() {
-        //load the reminders
         mainCoroutineRule.pause()
         remindersRepository.setReturnError(true)
         remindersListViewModel.loadReminders()
 
-        //see the Loader when working thread paused
         assert(remindersListViewModel.showLoading.getOrAwaitValue())
 
-        //see the Loader after dispatcher resumed
         mainCoroutineRule.resume()
         assert(!remindersListViewModel.showLoading.getOrAwaitValue())
     }
