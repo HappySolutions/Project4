@@ -49,7 +49,7 @@ class ReminderListFragment : BaseFragment() {
         setupObserver()
 
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
-        enableMyLocation()
+        //enableMyLocation()
 
         return binding.root
     }
