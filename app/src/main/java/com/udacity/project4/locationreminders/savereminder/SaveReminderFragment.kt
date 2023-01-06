@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -14,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.Geofence
@@ -202,7 +204,7 @@ class SaveReminderFragment : BaseFragment() {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-        if (isForegroundAndBackgroundPermissionResultMissing(grantResults, requestCode)) {
+        if (isForegroundAndBackgroundPermissionResultMissing()) {
 
             Snackbar.make(
                 requireView(),
@@ -220,6 +222,31 @@ class SaveReminderFragment : BaseFragment() {
             checkDeviceLocSettingsthenStartGeofence()
         }
     }
+
+
+    fun isForegroundAndBackgroundPermissionResultMissing(
+    ): Boolean {
+        val foregroundLocationApproved = (
+                PackageManager.PERMISSION_GRANTED ==
+                        ActivityCompat.checkSelfPermission(
+                            requireActivity(),
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ))
+
+        val backgroundPermissionApproved =
+            if (runningQOrLater) {
+                PackageManager.PERMISSION_GRANTED ==
+                        ActivityCompat.checkSelfPermission(
+                            requireActivity(), Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        )
+            } else {
+                true
+            }
+
+        return foregroundLocationApproved && backgroundPermissionApproved
+    }
+
+
 
     override fun onResume() {
         super.onResume()

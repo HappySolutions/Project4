@@ -101,6 +101,7 @@ class ReminderListFragment : BaseFragment() {
             )
         }
     }
+
     private fun promptUserToEnableLocationServices() {
         _viewModel.showErrorMessage.postValue(fragmentContext.getString(R.string.location_required_error))
     }
@@ -113,12 +114,12 @@ class ReminderListFragment : BaseFragment() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (isRequestCodeEqualLocationPermissionCode(requestCode)) {
             if (isForegroundLocationPermissionGrantedFromResult(grantResults)) {
-                enableMyLocation()
+                //enableMyLocation()
             } else {
                 if (areLocationServicesEnabled(fragmentContext)) {
-                    promptUserToGrantLocationPermission()
+                    //promptUserToGrantLocationPermission()
                 } else {
-                    promptUserToEnableLocationServices()
+                    //promptUserToEnableLocationServices()
                 }
             }
         }
