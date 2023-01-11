@@ -48,4 +48,8 @@
     <string name="reminder_description" type="id">Description</string>
     <string name="reminder_latitude" type="id">"Latitude: "</string>
     <string name="reminder_longitude" type="id">"Longitude: "</string>
+    <string name="description">\"Description: \"</string>
+    <string name="location">\"Location: \"</string>
+    <string name="latitude">\"Latitude: \"</string>
+    <string name="longitude">\"Longitude: \"</string>
 </resources>
