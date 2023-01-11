@@ -1,13 +1,21 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.app.Application
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.CoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
+import org.hamcrest.CoreMatchers
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.core.IsEqual
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -19,63 +27,96 @@ import org.robolectric.annotation.Config
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
 
-    //provide testing to the RemindersListViewModel and its live data objects
-    @get:Rule
-    var instantExecutorRule = InstantTaskExecutorRule()
-
-    @get:Rule
+    @get: Rule
     var mainCoroutineRule = CoroutineRule()
 
+    @get: Rule
+    var instantExecutorRule = InstantTaskExecutorRule()
+
+
+    private lateinit var dataSource: FakeDataSource
     private lateinit var remindersListViewModel: RemindersListViewModel
-    private lateinit var remindersRepository: FakeDataSource
 
     @Before
     fun setupViewModel() {
-        stopKoin()
-
-        remindersRepository = FakeDataSource()
+        val reminder = ReminderDTO(
+            "title", "description", "location", 14.882,
+            15.822
+        )
+        val reminder2 = ReminderDTO(
+            "title2", "description2", "location2", 14.882,
+            15.822
+        )
+        val reminders = mutableListOf(reminder, reminder2)
+        dataSource = FakeDataSource(reminders)
 
         remindersListViewModel = RemindersListViewModel(
-            ApplicationProvider.getApplicationContext(), remindersRepository
+            ApplicationProvider.getApplicationContext() as Application,
+            dataSource
         )
     }
 
-    @Test
-    @Config(sdk = intArrayOf(Build.VERSION_CODES.O_MR1))
-    fun loadReminders_loading() {
-        mainCoroutineRule.pause()
-        remindersListViewModel.loadReminders()
-
-        assert(remindersListViewModel.showLoading.getOrAwaitValue())
-
-        mainCoroutineRule.resume()
-        assert(!remindersListViewModel.showLoading.getOrAwaitValue())
+    @After
+    fun cleanupDataSource() = runBlocking {
+        dataSource.deleteAllReminders()
+        stopKoin()
     }
 
+    @Config(sdk = [Build.VERSION_CODES.O])
     @Test
-    @Config(sdk = intArrayOf(Build.VERSION_CODES.O_MR1))
-    fun loadReminders_loadingError() {
-        mainCoroutineRule.pause()
-        remindersRepository.setReturnError(true)
+    fun testLoadReminders_2Reminders() {
         remindersListViewModel.loadReminders()
 
-        assert(remindersListViewModel.showLoading.getOrAwaitValue())
+        val remindersList = remindersListViewModel.remindersList.getOrAwaitValue()
 
-        mainCoroutineRule.resume()
-        assert(!remindersListViewModel.showLoading.getOrAwaitValue())
+        assertThat(remindersList?.size, IsEqual(2))
     }
 
+    @Config(sdk = [Build.VERSION_CODES.O])
     @Test
-    @Config(sdk = intArrayOf(Build.VERSION_CODES.O_MR1))
-    fun loadReminders_noData() {
-        mainCoroutineRule.pause()
-        remindersRepository.setReturnError(true)
+    fun testLoadReminders_noReminders() = runBlockingTest {
+        dataSource.deleteAllReminders()
         remindersListViewModel.loadReminders()
 
-        assert(remindersListViewModel.showLoading.getOrAwaitValue())
+        val remindersList = remindersListViewModel.remindersList.getOrAwaitValue()
 
-        mainCoroutineRule.resume()
-        assert(!remindersListViewModel.showLoading.getOrAwaitValue())
+        assertThat(remindersList?.size, IsEqual(0))
     }
 
+    @Config(sdk = [Build.VERSION_CODES.O])
+    @Test
+    fun testInvalidateShowNoData() = runBlocking {
+        dataSource.deleteAllReminders()
+        remindersListViewModel.loadReminders()
+
+        val showNoData = remindersListViewModel.showNoData.getOrAwaitValue()
+
+        assertThat(showNoData.toString(), CoreMatchers.`is`("true"))
+    }
+
+    @Config(sdk = [Build.VERSION_CODES.O])
+    @Test
+    fun check_loading() = mainCoroutineRule.runBlockingTest {
+        mainCoroutineRule.pauseDispatcher()
+        remindersListViewModel.loadReminders()
+
+        val showLoadingBefore = remindersListViewModel.showLoading.getOrAwaitValue()
+        assertThat(showLoadingBefore.toString(), CoreMatchers.`is`("true"))
+
+        mainCoroutineRule.resumeDispatcher()
+
+        val showLoadingAfter = remindersListViewModel.showLoading.getOrAwaitValue()
+        assertThat(showLoadingAfter.toString(), CoreMatchers.`is`("false"))
+    }
+
+    @Config(sdk = [Build.VERSION_CODES.O])
+    @Test
+    fun shouldReturnError() = mainCoroutineRule.runBlockingTest {
+        dataSource.setReturnError(true)
+
+        remindersListViewModel.loadReminders()
+
+        val snackbarText = remindersListViewModel.showSnackBar.getOrAwaitValue()
+        assertThat(snackbarText, IsEqual("Test exception"))
+    }
 }
