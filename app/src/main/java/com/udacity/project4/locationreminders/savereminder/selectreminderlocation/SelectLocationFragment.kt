@@ -3,20 +3,23 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.content.Context
-import android.content.res.Resources
+import android.content.IntentSender
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.observe
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -213,6 +216,63 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback  {
     private fun promptUserToGrantLocationPermission() {
         _viewModel.showErrorMessage.postValue(fragmentContext.getString(R.string.permission_denied_explanation))
     }
+    override fun onStart() {
+        super.onStart()
+        checkPermissionsthenEnableGeofencing()
+    }
+
+    private fun checkPermissionsthenEnableGeofencing() {
+        if (areforegroundAndBackgroundLocationPermissionApproved(fragmentContext)) {
+            checkDeviceLocSettingsthenStartGeofence()
+        } else {
+            requestForegroundAndBackgroundLocationPermissions()
+        }
+    }
+    private fun checkDeviceLocSettingsthenStartGeofence(resolve: Boolean = true) {
+        val locationSettingsResponseTask = getLocationSettingsResponseTask(fragmentContext)
+
+        locationSettingsResponseTask.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException && resolve) {
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(
+                        requireActivity(),
+                        REQUEST_TURN_DEVICE_LOCATION_ON
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    Log.d("TAG", "Error getting location settings resolution: " + sendEx.message)
+                }
+            } else {
+                Snackbar.make(
+                    requireView(),
+                    R.string.location_required_error, Snackbar.LENGTH_INDEFINITE
+                ).setAction(android.R.string.ok) {
+                    checkDeviceLocSettingsthenStartGeofence()
+                }.show()
+            }
+        }
+        locationSettingsResponseTask.addOnCompleteListener {
+            if (it.isSuccessful) {
+                println(fragmentContext.getString(R.string.location_enabled))
+            }
+        }
+    }
+
+    @TargetApi(29)
+    private fun requestForegroundAndBackgroundLocationPermissions() {
+        if (areforegroundAndBackgroundLocationPermissionApproved(fragmentContext))
+            return
+
+        val permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        val resultCode = getForegroundAndBackgroundResultCode(permissionsArray)
+
+        requestPermissions(
+            permissionsArray,
+            resultCode
+        )
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
