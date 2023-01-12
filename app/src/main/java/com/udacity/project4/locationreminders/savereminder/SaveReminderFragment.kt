@@ -202,6 +202,7 @@ class SaveReminderFragment : BaseFragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
